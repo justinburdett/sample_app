@@ -2,6 +2,7 @@ class UsersController < ApplicationController
 	  before_filter :authenticate, :only => [:index, :edit, :update, :destroy]
 	  before_filter :correct_user, :only => [:edit, :update]
 	  before_filter :admin_user, :only => :destroy
+	  before_filter :already_signed_in, :only => [:new, :create]
   
   def show
   	@user = User.find(params[:id])
@@ -47,9 +48,10 @@ class UsersController < ApplicationController
   	@users = User.paginate(:page => params[:page])
   end
   
-  def show
-  	@user = User.find(params[:id])
-  	@title = @user.name
+def show
+    @user = User.find(params[:id])
+    @microposts = @user.microposts.paginate(:page => params[:page])
+    @title = @user.name
   end
  
  def destroy
@@ -60,8 +62,8 @@ class UsersController < ApplicationController
  
   private
 
-    def authenticate
-      deny_access unless signed_in?
+    def already_signed_in
+    	redirect_to(root_path) if signed_in?
     end
     
     def correct_user
